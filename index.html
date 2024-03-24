@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS6105-Yifan Chen</title>
+</head>
+
+<body style="margin:0;padding:0;">
+
+    <script type="module" src="main.js"></script>
+
+    <script src="./libs/ammo.wasm.js"></script>
+
+    <!-- load the video -->
+    <video id="video" autoplay controls src="assets/video.mp4"
+        style="z-index: -1;position: absolute;display:none"></video>
+
+    <!-- ---------------------------sky--------------------------- -->
+    <!-- the pixels position of sky -->
+    <script type="x-shader/x-vertex" id="vertexShaderS">
+        varying vec3 vWorldPosition;
+        void main() {
+            vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+            vWorldPosition = worldPosition.xyz;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+        }
+    </script>
+
+    <!-- the pixels color of sky -->
+    <script type="x-shader/x-fragment" id="fragmentShaderS">
+        uniform vec3 topColor;
+        uniform vec3 bottomColor;
+        uniform float offset;
+        uniform float exponent;
+        varying vec3 vWorldPosition;
+
+        void main() {
+            float h = normalize( vWorldPosition + offset ).y;
+            gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h, 0.0 ), exponent ), 0.0 ) ), 1.0 );
+        }
+    </script>
+
+    <!-- ---------------------------ring--------------------------- -->
+    <!-- the pixels position of ring -->
+    <script type="x-shader/x-vertex" id="vertexShader1">
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+
+    <!-- to change the pixels color of ring -->
+    <script type="x-shader/x-fragment" id="fragmentShader1">
+        uniform float time;
+        varying vec2 vUv;
+        void main() {
+            vec2 position = - 1.0 + 2.0 * vUv;
+            float red = abs( sin( position.x * position.y + time / 5.0 ) );
+            float green = abs( sin( position.x * position.y + time / 4.0 ) );
+            float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+            gl_FragColor = vec4( red, green, blue, 1.0 );
+        }
+    </script>
+
+    <!-- ---------------------------text--------------------------- -->
+    <!-- the pixels position of text -->
+    <script type="x-shader/x-vertex" id="vertexShader2">
+        varying vec2 vUv;
+        void main(){
+            vUv = uv;
+            gl_Position =  projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+
+    <!-- to change the pixels color of text -->
+    <script type="x-shader/x-fragment" id="fragmentShader2">
+        varying vec2 vUv;
+        uniform float time;
+        varying vec3 a_position;
+        void main(){
+            gl_FragColor = vec4(vUv.x*cos(time/2.0),vUv.y,0.6,1.0);
+        }
+    </script>
+
+    <!-- ---------------------------colorful lights--------------------------- -->
+    <!-- to change the pixels position of colorful lights -->
+    <script type="x-shader/x-vertex" id="vertexShader3">
+        uniform float time;
+        varying vec2 vUv;
+        void main(){
+            vUv = uv;
+            vec3 posChange = position;
+            posChange.x = (1.0+posChange.x)*((0.1*abs(sin(time*0.5))+0.3));
+            posChange.z = (1.0+posChange.z)*((0.1*abs(sin(time*0.5))+0.3));
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(posChange,1.0);
+        }
+    </script>
+
+    <!-- to change the pixels color of colorful lights -->
+    <script type="x-shader/x-fragment" id="fragmentShader3">
+        uniform float time;
+        varying vec2 vUv;
+        void main( ) {
+            vec2 position = - 1.0 + 2.0 * vUv;
+            float red = abs( sin( position.x * position.y + time / 5.0 ) );
+            float green = abs( sin( position.x * position.y + time / 4.0 ) );
+            float blue = abs( sin( position.x * position.y + time / 3.0 ) );
+            gl_FragColor = vec4( red, green, blue, 1.0 );
+        }
+    </script>
+
+</body>
+
+</html>
